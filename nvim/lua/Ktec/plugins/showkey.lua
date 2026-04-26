@@ -1,7 +1,7 @@
 return {
     {
         "nvzone/showkeys",
-        lazy = true, -- auto run on startup
+        lazy = true,
         cmd = "ShowkeysToggle",
         opts = {
             position = "bottom-center",
@@ -17,11 +17,10 @@ return {
                 col = 0,
             },
         },
-        config = function(_, opts)
-            require("showkeys").setup(opts)
-            vim.defer_fn(function()
-                vim.cmd("ShowkeysToggle")
-            end, 100)
-        end,
+        -- OFF by default — toggle manually with :ShowkeysToggle
+        -- Good for screen recording / demos only
+        keys = {
+            { "<leader>sk", "<cmd>ShowkeysToggle<CR>", desc = "Toggle showkeys" },
+        },
     },
 }

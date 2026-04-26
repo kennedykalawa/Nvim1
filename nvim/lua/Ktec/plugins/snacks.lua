@@ -1,10 +1,8 @@
 return {
-    -- HACK: docs @ https://github.com/folke/snacks.nvim/blob/main/docs
     {
         "folke/snacks.nvim",
         priority = 1000,
         lazy = false,
-        -- NOTE: Options
         opts = {
             styles = {
                 input = {
@@ -12,29 +10,110 @@ return {
                         n_esc = { "<C-c>", { "cmp_close", "cancel" }, mode = "n", expr = true },
                         i_esc = { "<C-c>", { "cmp_close", "stopinsert" }, mode = "i", expr = true },
                     },
-                }
+                },
+                -- Floating terminal style
+                terminal = {
+                    bo = { filetype = "snacks_terminal" },
+                    wo = {},
+                    keys = {
+                        q = "hide",
+                        gf = function(self)
+                            local f = vim.fn.findfile(vim.fn.expand("<cfile>"), "**")
+                            if #f > 0 then vim.cmd("e " .. f) end
+                        end,
+                    },
+                },
             },
-            -- Snacks Modules
-            input = {
+            -- Terminal (the VS Code-style integrated terminal)
+            terminal = {
                 enabled = true,
+                win = {
+                    position = "float",
+                    border = "rounded",
+                    height = 0.7,
+                    width = 0.85,
+                    zindex = 50,
+                    title = "  Terminal",
+                    title_pos = "center",
+                },
             },
+            input = { enabled = true },
             quickfile = {
                 enabled = true,
                 exclude = { "latex" },
             },
-            -- HACK: read picker docs @ https://github.com/folke/snacks.nvim/blob/main/docs/picker.md
+            -- Scope highlighting (like VS Code's indent guides)
+            scope = {
+                enabled = true,
+                animate = {
+                    enabled = false,
+                },
+            },
+            -- Indent guides
+            indent = {
+                enabled = true,
+                indent = {
+                    char = "│",
+                    only_scope = false,
+                    only_current = false,
+                },
+                animate = {
+                    enabled = vim.fn.has("nvim-0.10") == 1,
+                    style = "out",
+                    easing = "linear",
+                    duration = {
+                        step = 20,
+                        total = 500,
+                    },
+                },
+                scope = {
+                    enabled = true,
+                    char = "│",
+                    hl = "SnacksIndentScope",
+                },
+            },
+            -- Statuscolumn (line numbers + signs, like VS Code's gutter)
+            statuscolumn = {
+                enabled = true,
+                left = { "mark", "sign" },
+                right = { "fold", "git" },
+                folds = {
+                    open = false,
+                    git_hl = false,
+                },
+                git = { patterns = { "GitSign", "MiniDiffSign" } },
+                refresh = 50,
+            },
+            -- Word highlighting under cursor
+            words = {
+                enabled = true,
+                debounce = 200,
+                notify_jump = false,
+                modes = { "n", "i", "c" },
+            },
+            -- Buffer delete
+            bufdelete = { enabled = true },
+            -- Rename
+            rename = { enabled = true },
+            -- Lazygit
+            lazygit = { enabled = true },
+            -- Dashboard
+            dashboard = {
+                enabled = true,
+                sections = {
+                    { section = "header" },
+                    { section = "keys", gap = 1, padding = 1 },
+                    { section = "startup" },
+                },
+            },
+            -- Picker (replaces telescope for most things)
             picker = {
                 enabled = true,
                 matchers = {
                     frecency = true,
                     cwd_bonus = false,
                 },
-                exclude = {
-                    ".git",
-                    "node_modules",
-                    "dist",
-                    "build",
-                },
+                exclude = { ".git", "node_modules", "dist", "build" },
                 formatters = {
                     file = {
                         filename_first = true,
@@ -43,31 +122,29 @@ return {
                     },
                 },
                 layout = {
-                    -- presets options : "default" , "ivy" , "ivy-split" , "telescope" , "vscode", "select" , "sidebar"
-                    -- override picker layout in keymaps function as a param below
-                    preset = "telescope", -- defaults to this layout unless overidden
+                    preset = "telescope",
                     cycle = false,
                 },
                 layouts = {
                     select = {
-                            preview = false,
-                            layout = {
-                                backdrop = false,
-                                width = 0.6,
-                                min_width = 80,
-                                height = 0.4,
-                                min_height = 10,
-                                box = "vertical",
-                                border = "rounded",
-                                title = "{title}",
-                                title_pos = "center",
-                                { win = "input", height = 1, border = "bottom" },
-                                { win = "list", border = "none" },
-                                { win = "preview", title = "{preview}", width = 0.6, height = 0.4, border = "top" },
-                        }
+                        preview = false,
+                        layout = {
+                            backdrop = false,
+                            width = 0.6,
+                            min_width = 80,
+                            height = 0.4,
+                            min_height = 10,
+                            box = "vertical",
+                            border = "rounded",
+                            title = "{title}",
+                            title_pos = "center",
+                            { win = "input", height = 1, border = "bottom" },
+                            { win = "list", border = "none" },
+                            { win = "preview", title = "{preview}", width = 0.6, height = 0.4, border = "top" },
+                        },
                     },
                     telescope = {
-                        reverse = true, -- set to false for search bar to be on top 
+                        reverse = true,
                         layout = {
                             box = "horizontal",
                             backdrop = false,
@@ -106,74 +183,64 @@ return {
                             },
                         },
                     },
-                }
-            },
-            image = {
-                enabled = function()
-                    return vim.bo.filetype == "markdown"
-                end,
-                doc = {
-                    float = false, -- show image on cursor hover
-                    inline = false, -- show image inline
-                    max_width = 50,
-                    max_height = 30,
-                    wo = {
-                        wrap = false,
-                    },
-                },
-                convert = {
-                    notify = true,
-                    command = "magick"
-                },
-                img_dirs = { "img", "images", "assets", "static", "public", "media", "attachments","Archives/All-Vault-Images/", "~/Library", "~/Downloads" },
-            },
-            dashboard = {
-                enabled = true,
-                sections = {
-                    { section = "header" },
-                    { section = "keys", gap = 1, padding = 1 },
-                    { section = "startup" },
-                    {
-                        section = "terminal",
-                        cmd = "ascii-image-converter /home/kdev/Downloads/Mybackup/Screenshots/Wallpapers/sunset-mountain-beautiful.jpg -C -c",
-                        random = 15,
-                        pane = 2,
-                        indent = 15,
-                        height = 20,
-                    },
                 },
             },
         },
-        -- NOTE: Keymaps
         keys = {
-            { "<leader>lg", function() require("snacks").lazygit() end, desc = "Lazygit" },
-            { "<leader>gl", function() require("snacks").lazygit.log() end, desc = "Lazygit Logs" },
-            { "<leader>rN", function() require("snacks").rename.rename_file() end, desc = "Fast Rename Current File" },
-            { "<leader>dB", function() require("snacks").bufdelete() end, desc = "Delete or Close Buffer  (Confirm)" },
+            -- Terminal
+            { "<C-\\>",      function() require("snacks").terminal.toggle() end,          desc = "Toggle terminal",          mode = { "n", "t" } },
+            { "<leader>tt",  function() require("snacks").terminal.toggle() end,          desc = "Toggle floating terminal" },
 
-            -- Snacks Picker
-            { "<leader>pf", function() require("snacks").picker.files() end, desc = "Find Files (Snacks Picker)" },
-          { "<leader>pc", function() require("snacks").picker.files({ cwd = "~/dotfiles/nvim/.config/nvim/lua" }) end, desc = "Find Config File" },
-            { "<leader>ps", function() require("snacks").picker.grep() end, desc = "Grep word" },
-            { "<leader>pws", function() require("snacks").picker.grep_word() end, desc = "Search Visual selection or Word", mode = { "n", "x" } },
-            { "<leader>pk", function() require("snacks").picker.keymaps({ layout = "ivy" }) end, desc = "Search Keymaps (Snacks Picker)" },
+            -- Git
+            { "<leader>lg",  function() require("snacks").lazygit() end,                 desc = "Lazygit" },
+            { "<leader>gl",  function() require("snacks").lazygit.log() end,             desc = "Lazygit log" },
+            { "<leader>gfl", function() require("snacks").lazygit.log_file() end,        desc = "Lazygit file log" },
 
-            -- Git Stuff
-            { "<leader>gbr", function() require("snacks").picker.git_branches({ layout = "select" }) end, desc = "Pick and Switch Git Branches" },
+            -- Buffer/File
+            { "<leader>rN",  function() require("snacks").rename.rename_file() end,      desc = "Rename file" },
+            { "<leader>bd",  function() require("snacks").bufdelete() end,               desc = "Delete buffer" },
 
-            -- Other Utils
-            { "<leader>th" , function() require("snacks").picker.colorschemes({ layout = "ivy" }) end, desc = "Pick Color Schemes"},
-            { "<leader>vh", function() require("snacks").picker.help() end, desc = "Help Pages" },
-        }
+            -- Picker: Files
+            { "<leader>pf",  function() require("snacks").picker.files() end,            desc = "Find files" },
+            { "<leader>pr",  function() require("snacks").picker.recent() end,           desc = "Recent files" },
+            { "<leader>pc",  function() require("snacks").picker.files({ cwd = vim.fn.stdpath("config") }) end, desc = "Config files" },
+
+            -- Picker: Search
+            { "<leader>ps",  function() require("snacks").picker.grep() end,             desc = "Grep (live)" },
+            { "<leader>pws", function() require("snacks").picker.grep_word() end,        desc = "Grep word/selection", mode = { "n", "x" } },
+            { "<leader>pWs", function()
+                require("snacks").picker.grep({ search = vim.fn.expand("<cWORD>") })
+            end, desc = "Grep WORD under cursor" },
+
+            -- Picker: Vim
+            { "<leader>pk",  function() require("snacks").picker.keymaps({ layout = "ivy" }) end,       desc = "Keymaps" },
+            { "<leader>vh",  function() require("snacks").picker.help() end,             desc = "Help pages" },
+            { "<leader>pb",  function() require("snacks").picker.buffers() end,          desc = "Buffers" },
+            { "<leader>pd",  function() require("snacks").picker.diagnostics() end,      desc = "Diagnostics" },
+            { "<leader>pD",  function() require("snacks").picker.diagnostics_buffer() end, desc = "Buffer diagnostics" },
+            { "<leader>po",  function() require("snacks").picker.lsp_symbols() end,      desc = "LSP symbols" },
+
+            -- Picker: Git
+            { "<leader>gbr", function() require("snacks").picker.git_branches({ layout = "select" }) end, desc = "Git branches" },
+            { "<leader>gc",  function() require("snacks").picker.git_log() end,          desc = "Git commits" },
+            { "<leader>gs",  function() require("snacks").picker.git_status() end,       desc = "Git status" },
+
+            -- Themes
+            { "<leader>th",  function() require("snacks").picker.colorschemes({ layout = "ivy" }) end, desc = "Pick colorscheme" },
+
+            -- Word navigation (like VS Code's highlight occurrences)
+            { "]]",          function() require("snacks").words.jump(vim.v.count1) end,  desc = "Next word reference",    mode = { "n", "t" } },
+            { "[[",          function() require("snacks").words.jump(-vim.v.count1) end, desc = "Prev word reference",    mode = { "n", "t" } },
+        },
     },
-    -- NOTE: todo comments w/ snacks
+    -- Todo comments integrated with snacks picker
     {
         "folke/todo-comments.nvim",
         event = { "BufReadPre", "BufNewFile" },
         optional = true,
         keys = {
-            { "<leader>pt", function() require("snacks").picker.todo_comments() end, desc = "All" },
-            { "<leader>pT", function() require("snacks").picker.todo_comments({ keywords = { "TODO","FORGETNOT","FIXME" } }) end, desc = "mains" },
+            { "<leader>pt",  function() require("snacks").picker.todo_comments() end,                                          desc = "All TODOs" },
+            { "<leader>pT",  function() require("snacks").picker.todo_comments({ keywords = { "TODO", "FORGETNOT", "FIXME" } }) end, desc = "Main TODOs" },
         },
-    }
+    },
 }

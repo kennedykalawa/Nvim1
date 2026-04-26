@@ -1,7 +1,3 @@
--- vim.g.loaded_netrw = 0
--- vim.g.loaded_netrwPlugin = 0
--- vim.cmd("let g:netrw_liststyle = 3")
--- Disable netrw banner
 vim.cmd("let g:netrw_banner = 0")
 
 -- line numbers
@@ -16,12 +12,14 @@ vim.opt.expandtab = true
 vim.opt.smartindent = true
 vim.opt.wrap = false
 
--- Always hard wrap at 80 characters in every file
-vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter" }, {
+-- Hard wrap ONLY for markdown and git commits (not code files)
+vim.api.nvim_create_autocmd("FileType", {
+    pattern = { "markdown", "gitcommit", "text" },
     callback = function()
         vim.opt_local.textwidth = 80
-        vim.opt_local.formatoptions:append("t") -- wrap text
-        vim.opt_local.smartindent = false
+        vim.opt_local.formatoptions:append("t")
+        vim.opt_local.wrap = true
+        vim.opt_local.linebreak = true
     end,
 })
 
@@ -33,16 +31,24 @@ vim.opt.undofile = true
 
 -- search
 vim.opt.inccommand = "split"
+vim.opt.ignorecase = true
+vim.opt.smartcase = true
+vim.opt.hlsearch = false
 
 -- UI
 vim.opt.background = "dark"
 vim.opt.scrolloff = 8
 vim.opt.signcolumn = "yes"
+vim.opt.termguicolors = true
+vim.opt.cursorline = true
+vim.opt.showmode = false -- lualine handles this
 
--- folding (for nvim-ufo)
+-- folding
 vim.o.foldenable = true
-vim.o.foldmethod = "manual"
+vim.o.foldmethod = "expr"
+vim.o.foldexpr = "v:lua.vim.treesitter.foldexpr()"
 vim.o.foldlevel = 99
+vim.o.foldlevelstart = 99
 vim.o.foldcolumn = "0"
 
 -- window splits
@@ -56,3 +62,14 @@ vim.opt.updatetime = 50
 vim.opt.colorcolumn = "80"
 vim.opt.clipboard:append("unnamedplus")
 vim.opt.mouse = "a"
+
+-- Better completion experience
+vim.opt.completeopt = { "menuone", "noselect" }
+vim.opt.pumheight = 10 -- popup menu height
+
+-- Faster which-key
+vim.opt.timeoutlen = 300
+
+-- Show invisible chars
+vim.opt.list = true
+vim.opt.listchars = { tab = "» ", trail = "·", nbsp = "␣" }

@@ -3,95 +3,110 @@ local opts = { noremap = true, silent = true }
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 
-vim.keymap.set("n", "<leader><leader>", function()
-    vim.cmd("so")
-end)
+-- Source current file
+vim.keymap.set("n", "<leader><leader>", function() vim.cmd("so") end, { desc = "Source current file" })
 
-vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv", { desc = "moves lines down in visual selection" })
-vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv", { desc = "moves lines up in visual selection" })
+-- Move lines in visual mode
+vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv", { desc = "Move lines down" })
+vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv", { desc = "Move lines up" })
 
+-- Navigation
 vim.keymap.set("n", "J", "mzJ`z")
-vim.keymap.set("n", "<C-d>", "<C-d>zz", { desc = "move down in buffer with cursor centered" })
-vim.keymap.set("n", "<C-u>", "<C-u>zz", { desc = "move up in buffer with cursor centered" })
+vim.keymap.set("n", "<C-d>", "<C-d>zz", { desc = "Scroll down centered" })
+vim.keymap.set("n", "<C-u>", "<C-u>zz", { desc = "Scroll up centered" })
 vim.keymap.set("n", "n", "nzzzv")
 vim.keymap.set("n", "N", "Nzzzv")
 
+-- Indent and stay in visual mode
 vim.keymap.set("v", "<", "<gv", opts)
 vim.keymap.set("v", ">", ">gv", opts)
 
--- the how it be paste
-vim.keymap.set("x", "<leader>p", [["_dP]])
-
--- remember yanked
+-- Paste without overwriting register
+vim.keymap.set("x", "<leader>p", [["_dP]], { desc = "Paste without yanking" })
 vim.keymap.set("v", "p", '"_dp', opts)
 
--- Copies or Yank to system clipboard
+-- System clipboard yank
 vim.keymap.set("n", "<leader>Y", [["+Y]], opts)
+vim.keymap.set({ "n", "v" }, "<leader>y", [["+y]], { desc = "Yank to clipboard" })
 
--- leader d delete wont remember as yanked/clipboard when delete pasting
-vim.keymap.set({ "n", "v" }, "<leader>d", [["_d]])
+-- Delete without saving to register
+vim.keymap.set({ "n", "v" }, "<leader>d", [["_d]], { desc = "Delete without register" })
 
--- ctrl c as escape cuz Im lazy to reach up to the esc key
+-- Escape aliases
 vim.keymap.set("i", "<C-c>", "<Esc>")
-vim.keymap.set("n", "<C-c>", ":nohl<CR>", { desc = "Clear search hl", silent = true })
--- format without prettier using the built in
-vim.keymap.set("n", "<leader>f", vim.lsp.buf.format)
+vim.keymap.set("n", "<C-c>", ":nohl<CR>", { desc = "Clear search highlight", silent = true })
 
--- Unmaps Q in normal mode
+-- Format
+vim.keymap.set("n", "<leader>f", vim.lsp.buf.format, { desc = "Format file" })
+
+-- Disable Q
 vim.keymap.set("n", "Q", "<nop>")
 
---Stars new tmux session from in here
+-- Tmux sessionizer
 vim.keymap.set("n", "<C-f>", "<cmd>silent !tmux neww tmux-sessionizer<CR>")
 
--- prevent x delete from registering when next paste
+-- Prevent x from yanking
 vim.keymap.set("n", "x", '"_x', opts)
 
--- Replace the word cursor is on globally
+-- Global replace word under cursor
 vim.keymap.set("n", "<leader>s", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]],
-    { desc = "Replace word cursor is on globally" })
+    { desc = "Replace word under cursor" })
 
--- Executes shell command from in here making file executable
-vim.keymap.set("n", "<leader>x", "<cmd>!chmod +x %<CR>", { silent = true, desc = "makes file executable" })
+-- Make file executable
+vim.keymap.set("n", "<leader>x", "<cmd>!chmod +x %<CR>", { silent = true, desc = "Make file executable" })
 
--- Hightlight yanking
+-- Highlight on yank
 vim.api.nvim_create_autocmd("TextYankPost", {
-    desc = "Highlight when yanking (copying) text",
+    desc = "Highlight when yanking text",
     group = vim.api.nvim_create_augroup("kickstart-highlight-yank", { clear = true }),
-    callback = function()
-        vim.hl.on_yank()
-    end,
+    callback = function() vim.hl.on_yank() end,
 })
 
--- tab stuff
-vim.keymap.set("n", "<leader>to", "<cmd>tabnew<CR>")   --open new tab
-vim.keymap.set("n", "<leader>tx", "<cmd>tabclose<CR>") --close current tab
-vim.keymap.set("n", "<leader>tn", "<cmd>tabn<CR>")     --go to next
-vim.keymap.set("n", "<leader>tp", "<cmd>tabp<CR>")     --go to pre
-vim.keymap.set("n", "<leader>tf", "<cmd>tabnew %<CR>") --open current tab in new tab
+-- Tabs
+vim.keymap.set("n", "<leader>to", "<cmd>tabnew<CR>",   { desc = "New tab" })
+vim.keymap.set("n", "<leader>tx", "<cmd>tabclose<CR>", { desc = "Close tab" })
+vim.keymap.set("n", "<leader>tn", "<cmd>tabn<CR>",     { desc = "Next tab" })
+vim.keymap.set("n", "<leader>tp", "<cmd>tabp<CR>",     { desc = "Prev tab" })
+vim.keymap.set("n", "<leader>tf", "<cmd>tabnew %<CR>", { desc = "Current buf in new tab" })
 
---split management
-vim.keymap.set("n", "<leader>sv", "<C-w>v", { desc = "Split window vertically" })
--- split window vertically
-vim.keymap.set("n", "<leader>sh", "<C-w>s", { desc = "Split window horizontally" })
--- split window horizontally
-vim.keymap.set("n", "<leader>se", "<C-w>=", { desc = "Make splits equal size" }) -- make split windows equal width & height
--- close current split window
-vim.keymap.set("n", "<leader>sx", "<cmd>close<CR>", { desc = "Close current split" })
+-- Splits
+vim.keymap.set("n", "<leader>sv", "<C-w>v",          { desc = "Split vertical" })
+vim.keymap.set("n", "<leader>sh", "<C-w>s",          { desc = "Split horizontal" })
+vim.keymap.set("n", "<leader>se", "<C-w>=",          { desc = "Equal split sizes" })
+vim.keymap.set("n", "<leader>sx", "<cmd>close<CR>",  { desc = "Close split" })
 
--- Copy filepath to the clipboard
+-- Buffer navigation (quick, no plugin needed)
+vim.keymap.set("n", "<S-h>", "<cmd>bprevious<CR>", { desc = "Prev buffer" })
+vim.keymap.set("n", "<S-l>", "<cmd>bnext<CR>",     { desc = "Next buffer" })
+vim.keymap.set("n", "<leader>bd", function() require("snacks").bufdelete() end, { desc = "Delete buffer" })
+
+-- Copy filepath
 vim.keymap.set("n", "<leader>fp", function()
-  local filePath = vim.fn.expand("%:~") -- Gets the file path relative to the home directory
-  vim.fn.setreg("+", filePath) -- Copy the file path to the clipboard register
-  print("File path copied to clipboard: " .. filePath)
-end, { desc = "Copy file path to clipboard" })
+    local path = vim.fn.expand("%:~")
+    vim.fn.setreg("+", path)
+    print("Copied: " .. path)
+end, { desc = "Copy file path" })
 
--- Toggle LSP diagnostics visibility
+-- Toggle LSP diagnostics
 local isLspDiagnosticsVisible = true
 vim.keymap.set("n", "<leader>lx", function()
     isLspDiagnosticsVisible = not isLspDiagnosticsVisible
     vim.diagnostic.config({
         virtual_text = isLspDiagnosticsVisible,
-        underline = isLspDiagnosticsVisible
+        underline = isLspDiagnosticsVisible,
     })
 end, { desc = "Toggle LSP diagnostics" })
 
+-- LSP diagnostics float
+vim.keymap.set("n", "<leader>e", vim.diagnostic.open_float, { desc = "Open diagnostic float" })
+vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, { desc = "Prev diagnostic" })
+vim.keymap.set("n", "]d", vim.diagnostic.goto_next, { desc = "Next diagnostic" })
+
+-- Quick save
+vim.keymap.set({ "n", "i", "v" }, "<C-s>", "<cmd>w<CR><Esc>", { desc = "Save file" })
+
+-- Resize splits with arrows
+vim.keymap.set("n", "<C-Up>",    "<cmd>resize +2<CR>",          { desc = "Resize up" })
+vim.keymap.set("n", "<C-Down>",  "<cmd>resize -2<CR>",          { desc = "Resize down" })
+vim.keymap.set("n", "<C-Left>",  "<cmd>vertical resize -2<CR>", { desc = "Resize left" })
+vim.keymap.set("n", "<C-Right>", "<cmd>vertical resize +2<CR>", { desc = "Resize right" })

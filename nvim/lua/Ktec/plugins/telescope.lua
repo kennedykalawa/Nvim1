@@ -1,50 +1,52 @@
 return {
-	"nvim-telescope/telescope.nvim",
-	branch = "master", -- using master to fix issues with deprecated to definition warnings 
-    -- '0.1.x' for stable ver.
-	dependencies = {
-		"nvim-lua/plenary.nvim",
-		{ "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
-		"nvim-tree/nvim-web-devicons",
-		"andrew-george/telescope-themes",
-	},
-	config = function()
-		local telescope = require("telescope")
-		local actions = require("telescope.actions")
-		local builtin = require("telescope.builtin")
+    "nvim-telescope/telescope.nvim",
+    branch = "master",
+    dependencies = {
+        "nvim-lua/plenary.nvim",
+        { "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
+        "nvim-tree/nvim-web-devicons",
+        -- Theme switcher with persist (this is what telescope is kept for)
+        "andrew-george/telescope-themes",
+    },
+    config = function()
+        local telescope = require("telescope")
+        local actions   = require("telescope.actions")
+        local builtin   = require("telescope.builtin")
 
-		telescope.load_extension("fzf")
-		telescope.load_extension("themes")
+        telescope.load_extension("fzf")
+        telescope.load_extension("themes")
 
-		telescope.setup({
-			defaults = {
-				path_display = { "smart" },
-				mappings = {
-					i = {
-						["<C-k>"] = actions.move_selection_previous,
-						["<C-j>"] = actions.move_selection_next,
-					},
-				},
-			},
-			extensions = {
-				themes = {
-					enable_previewer = true,
-					enable_live_preview = true,
-					persist = {
-						enabled = true,
-						path = vim.fn.stdpath("config") .. "/lua/colorscheme.lua",
-					},
-				},
-			},
-		})
+        telescope.setup({
+            defaults = {
+                path_display = { "smart" },
+                mappings = {
+                    i = {
+                        ["<C-k>"] = actions.move_selection_previous,
+                        ["<C-j>"] = actions.move_selection_next,
+                        ["<C-q>"] = actions.send_selected_to_qflist + actions.open_qflist,
+                    },
+                },
+            },
+            extensions = {
+                themes = {
+                    enable_previewer   = true,
+                    enable_live_preview = true,
+                    persist = {
+                        enabled = true,
+                        -- Points to current-theme.lua, NOT colorscheme.lua (bug fix)
+                        path = vim.fn.stdpath("config") .. "/lua/current-theme.lua",
+                    },
+                },
+            },
+        })
 
-		-- Keymaps
-		vim.keymap.set("n", "<leader>pr", "<cmd>Telescope oldfiles<CR>", { desc = "Fuzzy find recent files" })
-		vim.keymap.set("n", "<leader>pWs", function()
-			local word = vim.fn.expand("<cWORD>")
-			builtin.grep_string({ search = word })
-		end, { desc = "Find Connected Words under cursor" })
+        -- Only keep things Snacks picker can't do
+        -- CWORD grep (full <cWORD>)
+        vim.keymap.set("n", "<leader>pWs", function()
+            builtin.grep_string({ search = vim.fn.expand("<cWORD>") })
+        end, { desc = "Grep WORD under cursor" })
 
-		vim.keymap.set("n", "<leader>th", "<cmd>Telescope themes<CR>", { noremap = true, silent = true, desc = "Theme Switcher" })
+        -- Theme switcher (persists to current-theme.lua)
+        vim.keymap.set("n", "<leader>th", "<cmd>Telescope themes<CR>", { desc = "Theme switcher (persist)" })
     end,
 }
