@@ -105,6 +105,10 @@ vim.keymap.set("n", "]d", vim.diagnostic.goto_next, { desc = "Next diagnostic" }
 -- Quick save
 vim.keymap.set({ "n", "i", "v" }, "<C-s>", "<cmd>w<CR><Esc>", { desc = "Save file" })
 
+-- Standard Undo/Redo
+vim.keymap.set({ "n", "i" }, "<C-z>", "<cmd>undo<CR>", { desc = "Undo" })
+vim.keymap.set({ "n", "i" }, "<C-y>", "<cmd>redo<CR>", { desc = "Redo" })
+
 -- Resize splits with arrows
 vim.keymap.set("n", "<C-Up>",    "<cmd>resize +2<CR>",          { desc = "Resize up" })
 vim.keymap.set("n", "<C-Down>",  "<cmd>resize -2<CR>",          { desc = "Resize down" })

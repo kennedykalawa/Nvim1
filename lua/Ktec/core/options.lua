@@ -26,7 +26,9 @@ vim.api.nvim_create_autocmd("FileType", {
 -- backup and undo
 vim.opt.swapfile = false
 vim.opt.backup = false
-vim.opt.undodir = os.getenv("HOME") .. "/.vim/undodir"
+local undo_dir = os.getenv("HOME") .. "/.vim/undodir"
+vim.fn.mkdir(undo_dir, "p")
+vim.opt.undodir = undo_dir
 vim.opt.undofile = true
 
 -- search

@@ -325,9 +325,9 @@ return {
         "LudoPinelli/comment-box.nvim",
         event = { "BufReadPost" },
         keys = {
-            { "<leader>cb", function() require("comment-box").lbox(2) end,   mode = { "n", "v" }, desc = "Comment box" },
-            { "<leader>cc", function() require("comment-box").lcbox(10) end, mode = { "n", "v" }, desc = "Centered box" },
-            { "<leader>cl", function() require("comment-box").line(2) end,   mode = { "n", "v" }, desc = "Comment line" },
+            { "<leader>qb", function() require("comment-box").lbox(2) end,   mode = { "n", "v" }, desc = "Comment box" },
+            { "<leader>qc", function() require("comment-box").lcbox(10) end, mode = { "n", "v" }, desc = "Centered box" },
+            { "<leader>ql", function() require("comment-box").line(2) end,   mode = { "n", "v" }, desc = "Comment line" },
         },
     },
 
@@ -344,7 +344,7 @@ return {
         },
         keys = {
             { "<leader>rl", "<Plug>SnipRun",   mode = { "n", "v" }, desc = "Sniprun line/selection" },
-            { "<leader>rx", "<cmd>SnipClose<CR>",                   desc = "Close sniprun output" },
+            { "<leader>rX", "<cmd>SnipClose<CR>",                   desc = "Close sniprun output" },
         },
     },
 }

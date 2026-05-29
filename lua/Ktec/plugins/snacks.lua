@@ -11,10 +11,11 @@ return {
                         i_esc = { "<C-c>", { "cmp_close", "stopinsert" }, mode = "i", expr = true },
                     },
                 },
-                -- Floating terminal style
                 terminal = {
                     bo = { filetype = "snacks_terminal" },
-                    wo = {},
+                    wo = {
+                        winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+                    },
                     keys = {
                         q = "hide",
                         gf = function(self)
@@ -24,9 +25,9 @@ return {
                     },
                 },
             },
-            -- Terminal (the VS Code-style integrated terminal)
             terminal = {
                 enabled = true,
+                shell = os.getenv("SHELL") or "/bin/zsh",
                 win = {
                     position = "float",
                     border = "rounded",
@@ -35,6 +36,18 @@ return {
                     zindex = 50,
                     title = "  Terminal",
                     title_pos = "center",
+                    style = "minimal",
+                },
+                bo = {
+                    filetype = "snacks_terminal",
+                },
+                wo = {
+                    winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+                },
+                keys = {
+                    q = "hide",
+                    ["<Esc>"] = "stopinsert",
+                    ["<C-c>"] = "stopinsert",
                 },
             },
             input = { enabled = true },
@@ -42,14 +55,12 @@ return {
                 enabled = true,
                 exclude = { "latex" },
             },
-            -- Scope highlighting (like VS Code's indent guides)
             scope = {
                 enabled = true,
                 animate = {
                     enabled = false,
                 },
             },
-            -- Indent guides
             indent = {
                 enabled = true,
                 indent = {
@@ -72,7 +83,6 @@ return {
                     hl = "SnacksIndentScope",
                 },
             },
-            -- Statuscolumn (line numbers + signs, like VS Code's gutter)
             statuscolumn = {
                 enabled = true,
                 left = { "mark", "sign" },
@@ -84,20 +94,15 @@ return {
                 git = { patterns = { "GitSign", "MiniDiffSign" } },
                 refresh = 50,
             },
-            -- Word highlighting under cursor
             words = {
                 enabled = true,
                 debounce = 200,
                 notify_jump = false,
                 modes = { "n", "i", "c" },
             },
-            -- Buffer delete
             bufdelete = { enabled = true },
-            -- Rename
             rename = { enabled = true },
-            -- Lazygit
             lazygit = { enabled = true },
-            -- Dashboard
             dashboard = {
                 enabled = true,
                 sections = {
@@ -106,7 +111,6 @@ return {
                     { section = "startup" },
                 },
             },
-            -- Picker (replaces telescope for most things)
             picker = {
                 enabled = true,
                 matchers = {
@@ -187,53 +191,77 @@ return {
             },
         },
         keys = {
-            -- Terminal
             { "<C-\\>",      function() require("snacks").terminal.toggle() end,          desc = "Toggle terminal",          mode = { "n", "t" } },
             { "<leader>tt",  function() require("snacks").terminal.toggle() end,          desc = "Toggle floating terminal" },
-
-            -- Git
+            { "<leader>ts",  function()
+                vim.cmd("belowright new")
+                require("snacks").terminal(nil, {
+                    win = {
+                        position = "split",
+                        height = 0.35,
+                        border = "rounded",
+                        title = "  Terminal Split",
+                    },
+                })
+            end, desc = "Terminal in split" },
+            { "<leader>tN",  function()
+                vim.ui.input({ prompt = "Terminal name: " }, function(name)
+                    if name then
+                        require("snacks").terminal(nil, {
+                            win = {
+                                position = "float",
+                                border = "rounded",
+                                height = 0.7,
+                                width = 0.85,
+                                title = "  " .. name,
+                                title_pos = "center",
+                            },
+                            env = { SHELL = "/bin/zsh" },
+                        })
+                    end
+                end)
+            end, desc = "Named terminal" },
+            { "<leader>tP",  function()
+                local project_root = vim.fn.getcwd()
+                require("snacks").terminal("cd " .. vim.fn.shellescape(project_root) .. " && zsh", {
+                    win = {
+                        position = "float",
+                        border = "rounded",
+                        height = 0.7,
+                        width = 0.85,
+                        title = "  Project: " .. vim.fn.fnamemodify(project_root, ":t"),
+                        title_pos = "center",
+                    },
+                    env = { SHELL = "/bin/zsh" },
+                })
+            end, desc = "Project terminal" },
             { "<leader>lg",  function() require("snacks").lazygit() end,                 desc = "Lazygit" },
             { "<leader>gl",  function() require("snacks").lazygit.log() end,             desc = "Lazygit log" },
             { "<leader>gfl", function() require("snacks").lazygit.log_file() end,        desc = "Lazygit file log" },
-
-            -- Buffer/File
             { "<leader>rN",  function() require("snacks").rename.rename_file() end,      desc = "Rename file" },
             { "<leader>bd",  function() require("snacks").bufdelete() end,               desc = "Delete buffer" },
-
-            -- Picker: Files
             { "<leader>pf",  function() require("snacks").picker.files() end,            desc = "Find files" },
             { "<leader>pr",  function() require("snacks").picker.recent() end,           desc = "Recent files" },
             { "<leader>pc",  function() require("snacks").picker.files({ cwd = vim.fn.stdpath("config") }) end, desc = "Config files" },
-
-            -- Picker: Search
             { "<leader>ps",  function() require("snacks").picker.grep() end,             desc = "Grep (live)" },
             { "<leader>pws", function() require("snacks").picker.grep_word() end,        desc = "Grep word/selection", mode = { "n", "x" } },
             { "<leader>pWs", function()
                 require("snacks").picker.grep({ search = vim.fn.expand("<cWORD>") })
             end, desc = "Grep WORD under cursor" },
-
-            -- Picker: Vim
             { "<leader>pk",  function() require("snacks").picker.keymaps({ layout = "ivy" }) end,       desc = "Keymaps" },
-            { "<leader>vh",  function() require("snacks").picker.help() end,             desc = "Help pages" },
+            { "<leader>ph",  function() require("snacks").picker.help() end,             desc = "Help pages" },
             { "<leader>pb",  function() require("snacks").picker.buffers() end,          desc = "Buffers" },
             { "<leader>pd",  function() require("snacks").picker.diagnostics() end,      desc = "Diagnostics" },
             { "<leader>pD",  function() require("snacks").picker.diagnostics_buffer() end, desc = "Buffer diagnostics" },
             { "<leader>po",  function() require("snacks").picker.lsp_symbols() end,      desc = "LSP symbols" },
-
-            -- Picker: Git
             { "<leader>gbr", function() require("snacks").picker.git_branches({ layout = "select" }) end, desc = "Git branches" },
             { "<leader>gc",  function() require("snacks").picker.git_log() end,          desc = "Git commits" },
             { "<leader>gs",  function() require("snacks").picker.git_status() end,       desc = "Git status" },
-
-            -- Themes
-            { "<leader>th",  function() require("snacks").picker.colorschemes({ layout = "ivy" }) end, desc = "Pick colorscheme" },
-
-            -- Word navigation (like VS Code's highlight occurrences)
+            { "<leader>uc",  function() require("snacks").picker.colorschemes({ layout = "ivy" }) end, desc = "Pick colorscheme" },
             { "]]",          function() require("snacks").words.jump(vim.v.count1) end,  desc = "Next word reference",    mode = { "n", "t" } },
             { "[[",          function() require("snacks").words.jump(-vim.v.count1) end, desc = "Prev word reference",    mode = { "n", "t" } },
         },
     },
-    -- Todo comments integrated with snacks picker
     {
         "folke/todo-comments.nvim",
         event = { "BufReadPre", "BufNewFile" },

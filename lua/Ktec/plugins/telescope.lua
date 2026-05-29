@@ -47,6 +47,6 @@ return {
         end, { desc = "Grep WORD under cursor" })
 
         -- Theme switcher (persists to current-theme.lua)
-        vim.keymap.set("n", "<leader>th", "<cmd>Telescope themes<CR>", { desc = "Theme switcher (persist)" })
+        vim.keymap.set("n", "<leader>uT", "<cmd>Telescope themes<CR>", { desc = "Theme switcher (persist)" })
     end,
 }

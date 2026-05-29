@@ -15,6 +15,8 @@ local runners = {
     -- Web
     javascript      = "node %f",
     typescript      = "npx ts-node %f",
+    javascriptreact = "node %f",
+    typescriptreact = "npx ts-node %f",
     html            = "live-server %d --entry-file=%n.html",
 
     -- Python
@@ -50,10 +52,11 @@ local runners = {
 
 -- Build the command string, substituting placeholders
 local function build_cmd(template, filepath)
-    local dir      = vim.fn.fnamemodify(filepath, ":h")
-    local noext    = vim.fn.fnamemodify(filepath, ":t:r")
+    local dir      = vim.fn.shellescape(vim.fn.fnamemodify(filepath, ":h"))
+    local noext    = vim.fn.shellescape(vim.fn.fnamemodify(filepath, ":t:r"))
+    local safe_file = vim.fn.shellescape(filepath)
     return template
-        :gsub("%%f", filepath)
+        :gsub("%%f", safe_file)
         :gsub("%%d", dir)
         :gsub("%%n", noext)
 end
@@ -158,27 +161,41 @@ vim.keymap.set("n", "<leader>rx", function()
 end, { desc = "Stop / close runner" })
 
 -- ─── Also add live-server for HTML specifically ───────────────────────────────
+local live_server_job_id = nil
+
 vim.api.nvim_create_autocmd("FileType", {
     pattern = "html",
     callback = function(ev)
         vim.keymap.set("n", "<leader>ls", function()
+            if live_server_job_id and live_server_job_id > 0 then
+                vim.notify("Live server is already running", vim.log.levels.INFO, { title = "Live Server" })
+                return
+            end
+
             local dir = vim.fn.expand("%:p:h")
-            require("snacks").terminal("live-server " .. dir, {
-                win = {
-                    position  = "float",
-                    border    = "rounded",
-                    height    = 0.4,
-                    width     = 0.6,
-                    title     = "  Live Server",
-                    title_pos = "center",
-                },
-                auto_close = false,
+            live_server_job_id = vim.fn.jobstart({ "live-server", dir }, {
+                on_exit = function()
+                    live_server_job_id = nil
+                end,
             })
+
+            if live_server_job_id <= 0 then
+                live_server_job_id = nil
+                vim.notify("Could not start live-server", vim.log.levels.ERROR, { title = "Live Server" })
+                return
+            end
+
+            vim.notify("Live server started for " .. dir, vim.log.levels.INFO, { title = "Live Server" })
         end, { buffer = ev.buf, desc = "HTML: start live-server" })
 
         vim.keymap.set("n", "<leader>lS", function()
-            vim.fn.jobstart("pkill -f live-server")
-            vim.notify("Live server stopped", vim.log.levels.INFO, { title = "Live Server" })
+            if live_server_job_id and live_server_job_id > 0 then
+                vim.fn.jobstop(live_server_job_id)
+                live_server_job_id = nil
+                vim.notify("Live server stopped", vim.log.levels.INFO, { title = "Live Server" })
+            else
+                vim.notify("No tracked live server job", vim.log.levels.INFO, { title = "Live Server" })
+            end
         end, { buffer = ev.buf, desc = "HTML: stop live-server" })
     end,
 })

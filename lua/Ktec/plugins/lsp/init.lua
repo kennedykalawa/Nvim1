@@ -1,6 +1,6 @@
 local servers = {
     "ts_ls", "html", "cssls", "tailwindcss", "svelte",
-    "graphql", "emmet_ls", "prismals",
+    "graphql", "emmet_ls", "prismals", "eslint",
     "lua_ls", "bashls", "pyright", "gopls", "rust_analyzer",
     "jsonls", "yamlls", "dockerls", "docker_compose_language_service",
     "omnisharp",  -- VB.NET + C# LSP (install dotnet-sdk first)
@@ -69,8 +69,7 @@ return {
                 map("gI",         vim.lsp.buf.implementation,  "Go to implementation")
                 map("gy",         vim.lsp.buf.type_definition, "Type definition")
                 map("K",          vim.lsp.buf.hover,           "Hover docs")
-                map("<leader>rn", vim.lsp.buf.rename,          "Rename symbol")
-                map("<leader>ca", vim.lsp.buf.code_action,     "Code action")
+                map("<leader>lR", vim.lsp.buf.rename,          "Rename symbol")
                 map("<leader>la", vim.lsp.buf.code_action,     "Code action")
                 map("<leader>lf", vim.lsp.buf.format,          "Format")
                 map("<leader>li", "<cmd>LspInfo<CR>",          "LSP info")
