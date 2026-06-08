@@ -1,12 +1,6 @@
 -- ─────────────────────────────────────────────────────────────────────────────
--- Code Runner — run any file right from Neovim
+-- Code Runner - run any file right from Neovim
 -- Works like VS Code's Code Runner extension
---
--- Keymaps:
---   <leader>rc  → Run current file
---   <leader>rs  → Run selected lines (visual mode)
---   <leader>rx  → Stop / close runner terminal
---   <leader>rw  → Run with args (prompts you)
 -- ─────────────────────────────────────────────────────────────────────────────
 
 -- Map filetypes to their run commands.
@@ -17,7 +11,6 @@ local runners = {
     typescript      = "npx ts-node %f",
     javascriptreact = "node %f",
     typescriptreact = "npx ts-node %f",
-    html            = "live-server %d --entry-file=%n.html",
 
     -- Python
     python          = "python3 %f",
@@ -44,11 +37,18 @@ local runners = {
 
     -- .NET / VB.NET
     vb              = "cd %d && dotnet run",
-    cs              = "cd %d && dotnet run",  -- C# too
+    cs              = "cd %d && dotnet run",
 
-    -- Config / markup (open in browser)
-    markdown        = "glow %f",              -- needs: npm i -g glow OR brew install glow
+    -- Config / markup
+    markdown        = "glow %f",
 }
+
+local function open_runner(cmd, title)
+    require("Ktec.utils.terminal").open("right", {
+        cmd = cmd,
+        title = "Runner: " .. title,
+    })
+end
 
 -- Build the command string, substituting placeholders
 local function build_cmd(template, filepath)
@@ -72,35 +72,22 @@ local function run_file(args)
 
     if not template then
         vim.notify(
-            "No runner configured for filetype: " .. ft .. "\nAdd it to coderunner.lua",
+            "No runner configured for filetype: " .. ft,
             vim.log.levels.WARN,
             { title = "Code Runner" }
         )
         return
     end
 
-    -- Optionally append user-supplied args
     local cmd = build_cmd(template, filepath)
     if args and args ~= "" then
         cmd = cmd .. " " .. args
     end
 
-    -- Run inside snacks floating terminal
-    require("snacks").terminal(cmd, {
-        win = {
-            position = "float",
-            border   = "rounded",
-            height   = 0.6,
-            width    = 0.75,
-            title    = "  Running: " .. vim.fn.expand("%:t"),
-            title_pos = "center",
-        },
-        -- Auto-close on success; keep open on error
-        auto_close = false,
-    })
+    open_runner(cmd, vim.fn.expand("%:t"))
 end
 
--- Run visually selected lines by writing them to a temp file
+-- Run visually selected lines
 local function run_selection()
     vim.cmd("silent! write")
     local ft    = vim.bo.filetype
@@ -110,7 +97,6 @@ local function run_selection()
         { type = vim.fn.visualmode() }
     )
 
-    -- Write selection to a temp file
     local tmpfile = vim.fn.tempname() .. "." .. ft
     vim.fn.writefile(lines, tmpfile)
 
@@ -121,20 +107,10 @@ local function run_selection()
     end
 
     local cmd = build_cmd(template, tmpfile)
-    require("snacks").terminal(cmd, {
-        win = {
-            position  = "float",
-            border    = "rounded",
-            height    = 0.5,
-            width     = 0.7,
-            title     = "  Running selection",
-            title_pos = "center",
-        },
-        auto_close = false,
-    })
+    open_runner(cmd, "selection")
 end
 
--- Run with custom args (prompts via snacks input)
+-- Run with custom args
 local function run_with_args()
     vim.ui.input({ prompt = "Run args: " }, function(input)
         if input ~= nil then
@@ -148,57 +124,13 @@ vim.keymap.set("n", "<leader>rc", run_file,      { desc = "Run file" })
 vim.keymap.set("v", "<leader>rs", run_selection, { desc = "Run selection" })
 vim.keymap.set("n", "<leader>rw", run_with_args, { desc = "Run file with args" })
 vim.keymap.set("n", "<leader>rx", function()
-    -- Close the snacks terminal if open
-    for _, win in ipairs(vim.api.nvim_list_wins()) do
-        local buf = vim.api.nvim_win_get_buf(win)
-        local ft  = vim.api.nvim_get_option_value("filetype", { buf = buf })
-        if ft == "snacks_terminal" then
-            vim.api.nvim_win_close(win, true)
-            return
-        end
+    -- Snacks terminals are buffers, we can just close the buffer or hide it
+    -- For now, let's just close the current window if it's a terminal
+    if vim.bo.filetype == "snacks_terminal" then
+        vim.api.nvim_win_close(0, true)
+    else
+        vim.notify("Not in a runner terminal", vim.log.levels.INFO, { title = "Code Runner" })
     end
-    vim.notify("No runner terminal open", vim.log.levels.INFO, { title = "Code Runner" })
 end, { desc = "Stop / close runner" })
 
--- ─── Also add live-server for HTML specifically ───────────────────────────────
-local live_server_job_id = nil
-
-vim.api.nvim_create_autocmd("FileType", {
-    pattern = "html",
-    callback = function(ev)
-        vim.keymap.set("n", "<leader>ls", function()
-            if live_server_job_id and live_server_job_id > 0 then
-                vim.notify("Live server is already running", vim.log.levels.INFO, { title = "Live Server" })
-                return
-            end
-
-            local dir = vim.fn.expand("%:p:h")
-            live_server_job_id = vim.fn.jobstart({ "live-server", dir }, {
-                on_exit = function()
-                    live_server_job_id = nil
-                end,
-            })
-
-            if live_server_job_id <= 0 then
-                live_server_job_id = nil
-                vim.notify("Could not start live-server", vim.log.levels.ERROR, { title = "Live Server" })
-                return
-            end
-
-            vim.notify("Live server started for " .. dir, vim.log.levels.INFO, { title = "Live Server" })
-        end, { buffer = ev.buf, desc = "HTML: start live-server" })
-
-        vim.keymap.set("n", "<leader>lS", function()
-            if live_server_job_id and live_server_job_id > 0 then
-                vim.fn.jobstop(live_server_job_id)
-                live_server_job_id = nil
-                vim.notify("Live server stopped", vim.log.levels.INFO, { title = "Live Server" })
-            else
-                vim.notify("No tracked live server job", vim.log.levels.INFO, { title = "Live Server" })
-            end
-        end, { buffer = ev.buf, desc = "HTML: stop live-server" })
-    end,
-})
-
--- This file is sourced directly by core/init.lua — no plugin table needed
 return {}

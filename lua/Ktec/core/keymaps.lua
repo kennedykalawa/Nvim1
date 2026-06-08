@@ -21,6 +21,20 @@ vim.keymap.set("n", "N", "Nzzzv")
 vim.keymap.set("v", "<", "<gv", opts)
 vim.keymap.set("v", ">", ">gv", opts)
 
+local function toggle_word_wrap()
+    local wrap = not vim.wo.wrap
+    vim.wo.wrap = wrap
+    vim.wo.linebreak = wrap
+    vim.wo.breakindent = wrap
+    vim.wo.breakindentopt = wrap and "shift:2,sbr" or ""
+    vim.wo.showbreak = wrap and "> " or ""
+    vim.wo.scrolloff = wrap and 0 or vim.o.scrolloff
+    vim.wo.sidescrolloff = wrap and 0 or vim.o.sidescrolloff
+end
+
+vim.keymap.set("n", "<A-z>", toggle_word_wrap, { desc = "Toggle word wrap" })
+vim.keymap.set("n", "<M-z>", toggle_word_wrap, { desc = "Toggle word wrap" })
+
 -- Paste without overwriting register
 vim.keymap.set("x", "<leader>p", [["_dP]], { desc = "Paste without yanking" })
 vim.keymap.set("v", "p", '"_dp', opts)
@@ -59,7 +73,7 @@ vim.keymap.set("n", "<leader>x", "<cmd>!chmod +x %<CR>", { silent = true, desc =
 vim.api.nvim_create_autocmd("TextYankPost", {
     desc = "Highlight when yanking text",
     group = vim.api.nvim_create_augroup("kickstart-highlight-yank", { clear = true }),
-    callback = function() vim.hl.on_yank() end,
+    callback = function() vim.highlight.on_yank() end,
 })
 
 -- Tabs
@@ -99,8 +113,12 @@ end, { desc = "Toggle LSP diagnostics" })
 
 -- LSP diagnostics float
 vim.keymap.set("n", "<leader>e", vim.diagnostic.open_float, { desc = "Open diagnostic float" })
-vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, { desc = "Prev diagnostic" })
-vim.keymap.set("n", "]d", vim.diagnostic.goto_next, { desc = "Next diagnostic" })
+vim.keymap.set("n", "[d", function()
+    vim.diagnostic.jump({ count = -1, float = true })
+end, { desc = "Prev diagnostic" })
+vim.keymap.set("n", "]d", function()
+    vim.diagnostic.jump({ count = 1, float = true })
+end, { desc = "Next diagnostic" })
 
 -- Quick save
 vim.keymap.set({ "n", "i", "v" }, "<C-s>", "<cmd>w<CR><Esc>", { desc = "Save file" })

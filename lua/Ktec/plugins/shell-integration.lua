@@ -13,10 +13,17 @@ return {
                     local buf = ev.buf
                     
                     vim.api.nvim_chan_send(vim.bo[buf].channel, "clear\n")
-                    
-                    vim.wo.wrap = true
-                    vim.wo.number = false
-                    vim.wo.relativenumber = false
+
+                    local win = vim.api.nvim_get_current_win()
+                    vim.api.nvim_win_set_option(win, "wrap", true)
+                    vim.api.nvim_win_set_option(win, "linebreak", true)
+                    vim.api.nvim_win_set_option(win, "breakindent", true)
+                    vim.api.nvim_win_set_option(win, "breakindentopt", "shift:2,sbr")
+                    vim.api.nvim_win_set_option(win, "showbreak", "> ")
+                    vim.api.nvim_win_set_option(win, "scrolloff", 0)
+                    vim.api.nvim_win_set_option(win, "sidescrolloff", 0)
+                    vim.api.nvim_win_set_option(win, "number", false)
+                    vim.api.nvim_win_set_option(win, "relativenumber", false)
                     
                     vim.cmd("startinsert")
                 end,

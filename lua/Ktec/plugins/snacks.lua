@@ -1,3 +1,5 @@
+local terminal = require("Ktec.utils.terminal")
+
 return {
     {
         "folke/snacks.nvim",
@@ -22,6 +24,12 @@ return {
                             local f = vim.fn.findfile(vim.fn.expand("<cfile>"), "**")
                             if #f > 0 then vim.cmd("e " .. f) end
                         end,
+                        ["<C-w>h"] = { "<C-\\><C-n><C-w>h", mode = "t" },
+                        ["<C-w>j"] = { "<C-\\><C-n><C-w>j", mode = "t" },
+                        ["<C-w>k"] = { "<C-\\><C-n><C-w>k", mode = "t" },
+                        ["<C-w>l"] = { "<C-\\><C-n><C-w>l", mode = "t" },
+                        ["<C-w>v"] = { function() terminal.open("right", { title = "Right" }) end, mode = "t", desc = "Split Vertical" },
+                        ["<C-w>s"] = { function() terminal.open("bottom", { title = "Bottom" }) end, mode = "t", desc = "Split Horizontal" },
                     },
                 },
             },
@@ -49,6 +57,9 @@ return {
                     ["<Esc>"] = "stopinsert",
                     ["<C-c>"] = "stopinsert",
                 },
+            },
+            image = {
+                enabled = true,
             },
             input = { enabled = true },
             quickfile = {
@@ -193,48 +204,28 @@ return {
         keys = {
             { "<C-\\>",      function() require("snacks").terminal.toggle() end,          desc = "Toggle terminal",          mode = { "n", "t" } },
             { "<leader>tt",  function() require("snacks").terminal.toggle() end,          desc = "Toggle floating terminal" },
-            { "<leader>ts",  function()
-                vim.cmd("belowright new")
-                require("snacks").terminal(nil, {
-                    win = {
-                        position = "split",
-                        height = 0.35,
-                        border = "rounded",
-                        title = "  Terminal Split",
-                    },
-                })
-            end, desc = "Terminal in split" },
+            { "<leader>tF",  function() terminal.open_many("float", vim.v.count1, { title = "Float" }) end,  desc = "Terminal float" },
+            { "<leader>tr",  function() terminal.open_many("right", vim.v.count1, { title = "Right" }) end,  desc = "Terminal right split" },
+            { "<leader>tl",  function() terminal.open_many("left", vim.v.count1, { title = "Left" }) end,    desc = "Terminal left split" },
+            { "<leader>tb",  function() terminal.open_many("bottom", vim.v.count1, { title = "Bottom" }) end, desc = "Terminal bottom split" },
+            { "<leader>tT",  function() terminal.open_many("top", vim.v.count1, { title = "Top" }) end,      desc = "Terminal top split" },
+            { "<leader>tv",  function() terminal.open_many("right", vim.v.count1, { title = "Vertical" }) end, desc = "Terminal vertical split" },
+            { "<leader>th",  function() terminal.open_many("bottom", vim.v.count1, { title = "Horizontal" }) end, desc = "Terminal horizontal split" },
+            { "<leader>ts",  function() terminal.choose() end, desc = "Choose terminal split" },
             { "<leader>tN",  function()
                 vim.ui.input({ prompt = "Terminal name: " }, function(name)
                     if name then
-                        require("snacks").terminal(nil, {
-                            win = {
-                                position = "float",
-                                border = "rounded",
-                                height = 0.7,
-                                width = 0.85,
-                                title = "  " .. name,
-                                title_pos = "center",
-                            },
-                            env = { SHELL = "/bin/zsh" },
-                        })
+                        terminal.open_many("float", vim.v.count1, { title = name })
                     end
                 end)
             end, desc = "Named terminal" },
             { "<leader>tP",  function()
                 local project_root = vim.fn.getcwd()
-                require("snacks").terminal("cd " .. vim.fn.shellescape(project_root) .. " && zsh", {
-                    win = {
-                        position = "float",
-                        border = "rounded",
-                        height = 0.7,
-                        width = 0.85,
-                        title = "  Project: " .. vim.fn.fnamemodify(project_root, ":t"),
-                        title_pos = "center",
-                    },
-                    env = { SHELL = "/bin/zsh" },
+                terminal.open_many("right", vim.v.count1, {
+                    title = "Project " .. vim.fn.fnamemodify(project_root, ":t"),
+                    cmd = "cd " .. vim.fn.shellescape(project_root) .. " && " .. (os.getenv("SHELL") or "zsh"),
                 })
-            end, desc = "Project terminal" },
+            end, desc = "Project terminal right" },
             { "<leader>lg",  function() require("snacks").lazygit() end,                 desc = "Lazygit" },
             { "<leader>gl",  function() require("snacks").lazygit.log() end,             desc = "Lazygit log" },
             { "<leader>gfl", function() require("snacks").lazygit.log_file() end,        desc = "Lazygit file log" },
