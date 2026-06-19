@@ -79,9 +79,21 @@ local providers = {
             return { "claude", "--continue" }
         end,
     },
+    ollama = {
+        label = "Ollama",
+        command = "ollama",
+        interactive = function()
+            return { "ollama", "launch" }
+        end,
+        prompt = function(_, prompt)
+            return { "ollama", "launch" }
+        end,
+        stdin = function(_, prompt_file)
+            return "ollama launch< " .. vim.fn.shellescape(prompt_file)
+        end,
+    },
 }
-
-local order = { "codex", "gemini", "copilot", "claude" }
+local order = { "codex", "gemini", "copilot", "claude", "ollama" }
 local default_provider = "codex"
 
 local function cwd()
@@ -228,6 +240,7 @@ vim.keymap.set("n", "<leader>ac", function() open_provider("codex") end, { desc 
 vim.keymap.set("n", "<leader>ag", function() open_provider("gemini") end, { desc = "AI: Gemini CLI" })
 vim.keymap.set("n", "<leader>ap", function() open_provider("copilot") end, { desc = "AI: Copilot CLI" })
 vim.keymap.set("n", "<leader>al", function() open_provider("claude") end, { desc = "AI: Claude CLI" })
+vim.keymap.set("n", "<leader>ao", function() open_provider("ollama") end, { desc = "AI: Ollama CLI" })
 vim.keymap.set("n", "<leader>aA", "<cmd>AiAsk<CR>", { desc = "AI: ask chosen CLI" })
 vim.keymap.set("n", "<leader>aR", "<cmd>AiReview<CR>", { desc = "AI: review file" })
 vim.keymap.set("n", "<leader>ae", "<cmd>AiExplainError<CR>", { desc = "AI: explain error" })
