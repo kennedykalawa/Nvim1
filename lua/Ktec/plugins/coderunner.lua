@@ -44,8 +44,10 @@ local runners = {
 }
 
 local function open_runner(cmd, title)
+    -- Append a pause command to keep the terminal open after execution
+    local paused_cmd = cmd .. "; echo 'Press Enter to close...'; read -r"
     require("Ktec.utils.terminal").open("right", {
-        cmd = cmd,
+        cmd = paused_cmd,
         title = "Runner: " .. title,
     })
 end
