@@ -29,6 +29,7 @@ return {
     -- File explorer (this works properly with oil unlike nvim-tree)
     {
         'echasnovski/mini.files',
+        enabled = false,
         config = function()
             local MiniFiles = require("mini.files")
             MiniFiles.setup({

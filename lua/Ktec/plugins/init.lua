@@ -26,6 +26,7 @@ return {
                 { "<leader>h",  group = "harpoon" },
                 { "<leader>l",  group = "lsp" },
                 { "<leader>r",  group = "run/tasks/request" },
+                { "<leader>T",  group = "tests" },
                 { "<leader>v",  group = "preview" },
                 { "<leader>w",  group = "workspace/session" },
                 { "<leader>c",  group = "code/ai" },

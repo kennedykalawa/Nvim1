@@ -13,9 +13,6 @@ return {
         local actions   = require("telescope.actions")
         local builtin   = require("telescope.builtin")
 
-      --  telescope.load_extension("fzf")
-        telescope.load_extension("themes")
-
         telescope.setup({
             defaults = {
                 path_display = { "smart" },
@@ -39,6 +36,9 @@ return {
                 },
             },
         })
+
+        pcall(telescope.load_extension, "fzf")
+        telescope.load_extension("themes")
 
         -- Only keep things Snacks picker can't do
         -- CWORD grep (full <cWORD>)

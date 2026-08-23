@@ -159,43 +159,53 @@ return {
         end,
     },
 
-    -- none-ls: formatters + linters
+    -- none-ls: formatters + linters (replaced by conform and nvim-lint)
     {
-        "nvimtools/none-ls.nvim",
+        "stevearc/conform.nvim",
+        event = { "BufWritePre" },
+        cmd = { "ConformInfo" },
+        keys = {
+            {
+                "<leader>f",
+                function() require("conform").format({ async = true, lsp_fallback = true }) end,
+                mode = "",
+                desc = "[F]ormat buffer",
+            },
+        },
+        opts = {
+            formatters_by_ft = {
+                lua = { "stylua" },
+                javascript = { "prettier" },
+                typescript = { "prettier" },
+                javascriptreact = { "prettier" },
+                typescriptreact = { "prettier" },
+                css = { "prettier" },
+                html = { "prettier" },
+                json = { "prettier" },
+                yaml = { "prettier" },
+                markdown = { "prettier" },
+                go = { "gofmt" },
+                python = { "isort", "black" },
+            },
+            format_on_save = { timeout_ms = 500, lsp_fallback = true },
+        },
+    },
+    {
+        "mfussenegger/nvim-lint",
         event = { "BufReadPre", "BufNewFile" },
-        dependencies = { "nvim-lua/plenary.nvim", "williamboman/mason.nvim" },
         config = function()
-            local null_ls = require("null-ls")
-            null_ls.setup({
-                sources = {
-                    null_ls.builtins.formatting.prettier.with({ extra_filetypes = { "svelte" } }),
-                    null_ls.builtins.formatting.stylua,
-                    null_ls.builtins.formatting.black,
-                    null_ls.builtins.formatting.isort,
-                    -- NOTE: eslint linting is handled by ts_ls / eslint LSP server
-                    -- none-ls no longer ships eslint builtins
-                    null_ls.builtins.diagnostics.pylint.with({
-                        condition = function(utils)
-                            return utils.root_has_file({ "pylintrc", ".pylintrc" })
-                        end,
-                    }),
-                },
+            require("lint").linters_by_ft = {
+                lua = { "luacheck" },
+                javascript = { "eslint_d" },
+                python = { "pylint" },
+            }
+            vim.api.nvim_create_autocmd({ "BufWritePost", "BufReadPost", "InsertLeave" }, {
+                callback = function()
+                    require("lint").try_lint()
+                end,
             })
         end,
     },
-
-    -- mason-null-ls: auto-install formatters/linters
-    {
-        "jay-babu/mason-null-ls.nvim",
-        event = { "BufReadPre", "BufNewFile" },
-        dependencies = { "williamboman/mason.nvim", "nvimtools/none-ls.nvim" },
-        opts = {
-            ensure_installed       = { "prettier", "stylua", "black", "isort", "pylint" },
-            automatic_installation = true,
-        },
-    },
-
-    -- nvim-cmp: completions
     {
         "hrsh7th/nvim-cmp",
         event = "InsertEnter",

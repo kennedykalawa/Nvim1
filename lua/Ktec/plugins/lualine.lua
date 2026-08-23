@@ -55,7 +55,11 @@ return {
                         color = { fg = "#ff9e64" },
                     },
                     { "filetype" },
+                    { "macro", fmt = function() local reg = vim.fn.reg_recording() return reg ~= "" and "@"..reg or "" end },
+                    { "searchcount" },
                 },
+                lualine_y = { "progress" },
+                lualine_z = { "location" },
             },
         })
     end,

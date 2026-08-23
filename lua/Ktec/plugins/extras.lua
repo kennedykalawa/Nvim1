@@ -331,6 +331,12 @@ return {
         },
     },
 
+    -- ─── Treesitter context ────────────────────────────────────────────────
+    {
+        "nvim-treesitter/nvim-treesitter-context",
+        event = { "BufReadPost" },
+        opts = { enable = true, mode = "cursor", max_lines = 3 },
+    },
     -- ─── sniprun: run lines/selection inline with output ───────────────────────
     {
         "michaelb/sniprun",

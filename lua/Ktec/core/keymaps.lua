@@ -50,9 +50,6 @@ vim.keymap.set({ "n", "v" }, "<leader>d", [["_d]], { desc = "Delete without regi
 vim.keymap.set("i", "<C-c>", "<Esc>")
 vim.keymap.set("n", "<C-c>", ":nohl<CR>", { desc = "Clear search highlight", silent = true })
 
--- Format
-vim.keymap.set("n", "<leader>f", vim.lsp.buf.format, { desc = "Format file" })
-
 -- Disable Q
 vim.keymap.set("n", "Q", "<nop>")
 

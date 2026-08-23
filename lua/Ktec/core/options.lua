@@ -12,6 +12,29 @@ vim.opt.expandtab = true
 vim.opt.smartindent = true
 vim.opt.wrap = false
 
+-- Prefer the conventions of the language being edited over one global width.
+local indent_group = vim.api.nvim_create_augroup("ktec_filetype_indent", { clear = true })
+vim.api.nvim_create_autocmd("FileType", {
+    group = indent_group,
+    pattern = { "lua", "javascript", "javascriptreact", "typescript", "typescriptreact", "json", "jsonc", "yaml", "html", "css", "scss", "svelte" },
+    callback = function()
+        vim.opt_local.expandtab = true
+        vim.opt_local.tabstop = 2
+        vim.opt_local.softtabstop = 2
+        vim.opt_local.shiftwidth = 2
+    end,
+})
+vim.api.nvim_create_autocmd("FileType", {
+    group = indent_group,
+    pattern = { "go", "make" },
+    callback = function()
+        vim.opt_local.expandtab = false
+        vim.opt_local.tabstop = 4
+        vim.opt_local.softtabstop = 4
+        vim.opt_local.shiftwidth = 4
+    end,
+})
+
 -- Hard wrap ONLY for markdown and git commits (not code files)
 vim.api.nvim_create_autocmd("FileType", {
     pattern = { "markdown", "gitcommit", "text" },
