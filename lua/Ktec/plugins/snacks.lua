@@ -22,7 +22,12 @@ return {
                         q = "hide",
                         gf = function(self)
                             local f = vim.fn.findfile(vim.fn.expand("<cfile>"), "**")
-                            if #f > 0 then vim.cmd("e " .. f) end
+                            if f ~= "" then
+                                self:hide()
+                                vim.schedule(function()
+                                    vim.cmd("edit " .. vim.fn.fnameescape(f))
+                                end)
+                            end
                         end,
                         ["<C-w>h"] = { "<C-\\><C-n><C-w>h", mode = "t" },
                         ["<C-w>j"] = { "<C-\\><C-n><C-w>j", mode = "t" },
@@ -34,9 +39,9 @@ return {
                 },
             },
             terminal = {
-                enabled = true,
                 shell = os.getenv("SHELL") or "/bin/zsh",
                 win = {
+                    style = "terminal",
                     position = "float",
                     border = "rounded",
                     height = 0.7,
@@ -44,18 +49,6 @@ return {
                     zindex = 50,
                     title = "  Terminal",
                     title_pos = "center",
-                    style = "minimal",
-                },
-                bo = {
-                    filetype = "snacks_terminal",
-                },
-                wo = {
-                    winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
-                },
-                keys = {
-                    q = "hide",
-                    ["<Esc>"] = "stopinsert",
-                    ["<C-c>"] = "stopinsert",
                 },
             },
             image = {

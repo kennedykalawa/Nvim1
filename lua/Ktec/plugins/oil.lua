@@ -2,22 +2,21 @@ return {
     "stevearc/oil.nvim",
     dependencies = { "nvim-tree/nvim-web-devicons" },
     config = function()
-        require("oil").setup({
+        local oil = require("oil")
+
+        oil.setup({
             default_file_explorer = true,
             columns = { "icon", "size" },
             keymaps = {
                 ["<C-h>"] = false,
                 ["<C-c>"] = false,
-                ["<M-h>"] = "actions.select_split",
+                ["<CR>"]  = "actions.select",
                 ["q"]     = "actions.close",
                 ["<C-p>"] = "actions.preview",
             },
             delete_to_trash = true,
             view_options = {
                 show_hidden = true,
-                is_hidden_file = function(name, _)
-                    return vim.startswith(name, ".")
-                end,
             },
             skip_confirm_for_simple_edits = true,
             float = {
@@ -26,8 +25,10 @@ return {
             },
         })
 
-        vim.keymap.set("n", "-",        "<CMD>Oil<CR>",              { desc = "Open parent directory" })
-        vim.keymap.set("n", "<leader>-", require("oil").toggle_float, { desc = "Oil float" })
+        vim.keymap.set("n", "-", "<CMD>Oil<CR>", { desc = "Open parent directory" })
+        vim.keymap.set("n", "<leader>-", function()
+            oil.toggle_float()
+        end, { desc = "Oil float" })
 
         vim.api.nvim_create_autocmd("FileType", {
             pattern = "oil",

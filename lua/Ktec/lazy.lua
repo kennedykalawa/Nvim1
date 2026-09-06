@@ -17,6 +17,11 @@ require("lazy").setup(
         { import = "Ktec.plugins.lsp" },
     },
     {
+        git = {
+            -- Slow connections can need more than the default two minutes
+            -- for a clone/fetch/checkout.
+            timeout = 600,
+        },
         checker = {
             enabled = true,
             notify = false,

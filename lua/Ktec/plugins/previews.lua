@@ -320,6 +320,7 @@ end
 
 local function start_live_server(port)
     port = tostring(port or "5500")
+    local url = "http://127.0.0.1:" .. port
 
     if not has_command("live-server", "Live Server") then
         return
@@ -341,9 +342,9 @@ local function start_live_server(port)
         .. " --host=127.0.0.1 --port="
         .. vim.fn.shellescape(port)
 
-    preview_state.live_task = shell_task("Live Server :" .. port, command)
-    vim.g.ktec_preview_url = "http://127.0.0.1:" .. port
-    vim.notify("Starting live-server for " .. dir, vim.log.levels.INFO, { title = "Live Server" })
+    preview_state.live_task = shell_task("Live Server " .. url, command)
+    vim.g.ktec_preview_url = url
+    vim.notify("Starting live-server at " .. url .. " for " .. dir, vim.log.levels.INFO, { title = "Live Server" })
 end
 
 local function preview_static()
